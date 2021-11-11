@@ -4,9 +4,9 @@
  * https://solidity.readthedocs.io/en/latest/080-breaking-changes.html
  */
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.5.16 <0.9.0;
+pragma solidity ^0.8.0;
 
-contract SimpleBank {
+contract SimpleBank{
 
     /* State variables
      */
@@ -46,8 +46,12 @@ contract SimpleBank {
     // Typically, called when invalid data is sent
     // Added so ether sent to this contract is reverted if the contract fails
     // otherwise, the sender's money is transferred to contract
-    fallback () external payable {
+    fallback() external payable {
         revert();
+    }
+
+    receive() external payable{
+      deposit();
     }
 
     /// @notice Get balance
@@ -100,9 +104,13 @@ contract SimpleBank {
       require(balances[msg.sender] >= withdrawAmount, "WithdrawAmount more than you balance");
       uint currentBalance = balances[msg.sender];
       uint newBalance = currentBalance - withdrawAmount;
+  
       payable(msg.sender).transfer(withdrawAmount);
 
+      balances[msg.sender] = newBalance;
+
       emit LogWithdrawal(msg.sender, withdrawAmount, newBalance);
+
       return newBalance;
       // If the sender's balance is at least the amount they want to withdraw,
       // Subtract the amount from the sender's balance, and try to send that amount of ether
